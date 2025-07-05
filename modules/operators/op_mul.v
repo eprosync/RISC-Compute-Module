@@ -16,7 +16,7 @@ module op_mul_64(input [63:0] Ain, Bin, output reg [127:0] Zout);
         multiplicand_storage = multiplicand_storage << 1;
         pattern = multiplier_storage[2:0];
 
-        for (i = 0; i < 31; i = i + 1) begin
+        for (i = 0; i < 32; i = i + 1) begin
             case (pattern)
                 // "000" and "111" are ignored, since they are 0 x M
                 3'b001, 3'b010: product_storage = product_storage + $signed({multiplicand_storage, 64'b0});
@@ -51,7 +51,7 @@ module op_mul_32(input [31:0] Ain, Bin, output reg [63:0] Zout);
         multiplicand_storage = multiplicand_storage << 1;
         pattern = multiplier_storage[2:0];
 
-        for (i = 0; i < 15; i = i + 1) begin
+        for (i = 0; i < 16; i = i + 1) begin
             case (pattern)
                 // "000" and "111" are ignored, since they are 0 x M
                 3'b001, 3'b010: product_storage = product_storage + $signed({multiplicand_storage, 32'b0});

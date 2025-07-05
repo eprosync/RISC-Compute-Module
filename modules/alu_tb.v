@@ -17,18 +17,34 @@ module alu_tb;
     .reg_C(C_out)
   );
 
+  // Clock Generator
+  initial Clock = 0;
+  always #5 Clock = ~Clock;
+
   // Initialize inputs
   initial begin
     // this is just to make sure switching control works
     A_in = 32'h00000004;
     B_in = 32'h00000004;
-    Control = 5'b00000;
+    Control = 5'b00011;
 	 
     #10;
 	 
     A_in = 32'h00000004;
     B_in = 32'h00000004;
-    Control = 5'b00001;
+    Control = 5'b00100;
+
+    #10;
+	 
+    A_in = 32'h00000004;
+    B_in = 32'h00000004;
+    Control = 5'b00101;
+
+    #10;
+	 
+    A_in = 32'h00000004;
+    B_in = 32'h00000004;
+    Control = 5'b00110;
 
     #10;
   end

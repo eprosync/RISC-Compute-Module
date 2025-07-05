@@ -6,7 +6,7 @@ module ALU_32(
         input [4:0] Control, // Which operator to use? (decoded from ID stage)
         input [31:0] reg_A, reg_B, // Input
         output reg [63:0] reg_C // Output
-    )
+    );
 
     parameter
         // MEMORY
@@ -61,7 +61,8 @@ module ALU_32(
     // It may sound bad having these all connected with no switches
     // But this is fine, technically all ALU's do this, they just match at the output for what you want as a result
     wire [31:0] add_out, sub_out;
-    op_add_32 add_op (.Ain(reg_A),.Bin(reg_B),.Cin(1'b0),.Zout(add_out));
+    wire add_cout_void;
+    op_add_32 add_op (.Ain(reg_A),.Bin(reg_B),.Cin(1'b0),.Zout(add_out),.Cout(add_cout_void));
     op_sub_32 sub_op (.Ain(reg_A),.Bin(reg_B),.Zout(sub_out));
 	 
 	wire [63:0] mul_out, div_out;
@@ -86,7 +87,13 @@ module ALU_32(
     op_not_32 not_op (.Ain(reg_B),.Zout(not_out));
     op_neg_32 neg_op (.Ain(reg_B),.Zout(neg_out));
 
-    always @ (*) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
+    // Was using this for debugging just to release reg_C when dealing with Clock dependancy
+    always @ (negedge Clock)
+    begin
+        reg_C = 32'b0;
+    end
+
+    always @ (posedge Clock) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
     begin
         // Normally this would go through the ADD operator, but I just got lazy I guess...
         if (IncrementPC) begin
@@ -99,68 +106,68 @@ module ALU_32(
                 add_select, addi_select: begin
                     reg_C[31:0] = add_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] ADD A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] ADD A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 sub_select: begin
                     reg_C[31:0] = sub_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] SUB A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] SUB A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
 
                 mul_select: begin
                     reg_C = mul_out;
-                    $display("%0t [ALU] MUL A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] MUL A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 div_select: begin
                     reg_C = div_out;
-                    $display("%0t [ALU] DIV A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] DIV A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
 
                 shl_select: begin
                     reg_C[31:0] = shl_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] SHL A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] SHL A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 shr_select: begin
                     reg_C[31:0] = shr_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] SHR A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] SHR A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 shra_select: begin
                     reg_C[31:0] = shra_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] SHRA A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] SHRA A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 rol_select: begin
                     reg_C[31:0] = rol_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] ROL A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] ROL A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 ror_select: begin
                     reg_C[31:0] = ror_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] ROR A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] ROR A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
 
                 and_select, andi_select: begin
                     reg_C[31:0] = and_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] AND A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] AND A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 or_select, ori_select: begin
                     reg_C[31:0] = or_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] OR A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] OR A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
                 not_select: begin
                     reg_C[31:0] = not_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] NOT %h", $time, reg_B);
+                    $display("%0t [ALU] NOT %h, C = %h", $time, reg_B, reg_C);
                 end
                 neg_select: begin
                     reg_C[31:0] = neg_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] NEG %h", $time, reg_B);
+                    $display("%0t [ALU] NEG %h, C = %h", $time, reg_B, reg_C);
                 end
 
                 br_select: begin
@@ -178,7 +185,7 @@ module ALU_32(
                 load_select, load_imm_select, store_select: begin
                     reg_C[31:0] = add_out;
                     reg_C[63:32] = 32'b0;
-                    $display("%0t [ALU] LD/ST A = %h, B = %h", $time, reg_A, reg_B);
+                    $display("%0t [ALU] LD/ST A = %h, B = %h, C = %h", $time, reg_A, reg_B, reg_C);
                 end
 
                 halt_select, nop_select: begin

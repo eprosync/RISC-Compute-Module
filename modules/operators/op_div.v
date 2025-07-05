@@ -3,6 +3,7 @@
 module op_div_64(input [63:0] Ain, Bin, output reg [127:0] Zout);
     reg signed [127:0] remainder;
     reg signed [63:0] divisor, dividend;
+    reg signed [63:0] abs_dividend, abs_divisor;
     reg [63:0] quotient;
 
     integer i;
@@ -18,8 +19,8 @@ module op_div_64(input [63:0] Ain, Bin, output reg [127:0] Zout);
             Zout = 128'hFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF;
         end else begin
             // Convert to absolute values for processing
-            reg signed [63:0] abs_dividend = (dividend < 0) ? -dividend : dividend;
-            reg signed [63:0] abs_divisor  = (divisor  < 0) ? -divisor  : divisor;
+            abs_dividend = (dividend < 0) ? -dividend : dividend;
+            abs_divisor  = (divisor  < 0) ? -divisor  : divisor;
 
             // Perform unsigned restoring division
             for (i = 63; i >= 0; i = i - 1) begin
@@ -47,6 +48,7 @@ endmodule
 module op_div_32(input [31:0] Ain, Bin, output reg [63:0] Zout);
     reg signed [63:0] remainder;
     reg signed [31:0] divisor, dividend;
+    reg signed [31:0] abs_dividend, abs_divisor;
     reg [31:0] quotient;
 
     integer i;
@@ -62,8 +64,8 @@ module op_div_32(input [31:0] Ain, Bin, output reg [63:0] Zout);
             Zout = 64'hFFFFFFFF_FFFFFFFF;
         end else begin
             // Convert to absolute values for processing
-            reg signed [31:0] abs_dividend = (dividend < 0) ? -dividend : dividend;
-            reg signed [31:0] abs_divisor  = (divisor  < 0) ? -divisor  : divisor;
+            abs_dividend = (dividend < 0) ? -dividend : dividend;
+            abs_divisor  = (divisor  < 0) ? -divisor  : divisor;
 
             // Perform unsigned restoring division
             for (i = 31; i >= 0; i = i - 1) begin
