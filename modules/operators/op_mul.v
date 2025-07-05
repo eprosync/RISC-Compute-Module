@@ -19,15 +19,15 @@ module op_mul_64(input [63:0] Ain, Bin, output reg [127:0] Zout);
         for (i = 0; i < 32; i = i + 1) begin
             case (pattern)
                 // "000" and "111" are ignored, since they are 0 x M
-                3'b001, 3'b010: product_storage = product_storage + $signed({multiplicand_storage, 64'b0});
-                3'b011: product_storage = product_storage + $signed({multiplicand_storage, 64'b0}) << 1;
-                3'b100: product_storage = product_storage - ($signed({multiplicand_storage, 64'b0}) << 1);
-                3'b101, 3'b110: product_storage = product_storage - $signed({multiplicand_storage, 64'b0});
+                3'b001, 3'b010: product_storage = product_storage + multiplicand_storage;
+                3'b011:         product_storage = product_storage + (multiplicand_storage << 1);
+                3'b100:         product_storage = product_storage - (multiplicand_storage << 1);
+                3'b101, 3'b110: product_storage = product_storage - multiplicand_storage;
                 default: ; // 000 or 111, do nothing
             endcase
 
             multiplicand_storage = multiplicand_storage << 2;
-            multiplier_storage = multiplier_storage >> 2;
+            multiplier_storage = multiplier_storage >>> 2;
             pattern = multiplier_storage[2:0];
         end
 
@@ -54,15 +54,15 @@ module op_mul_32(input [31:0] Ain, Bin, output reg [63:0] Zout);
         for (i = 0; i < 16; i = i + 1) begin
             case (pattern)
                 // "000" and "111" are ignored, since they are 0 x M
-                3'b001, 3'b010: product_storage = product_storage + $signed({multiplicand_storage, 32'b0});
-                3'b011: product_storage = product_storage + $signed({multiplicand_storage, 32'b0}) << 1;
-                3'b100: product_storage = product_storage - ($signed({multiplicand_storage, 32'b0}) << 1);
-                3'b101, 3'b110: product_storage = product_storage - $signed({multiplicand_storage, 32'b0});
+                3'b001, 3'b010: product_storage = product_storage + multiplicand_storage;
+                3'b011:         product_storage = product_storage + (multiplicand_storage << 1);
+                3'b100:         product_storage = product_storage - (multiplicand_storage << 1);
+                3'b101, 3'b110: product_storage = product_storage - multiplicand_storage;
                 default: ; // 000 or 111, do nothing
             endcase
 
             multiplicand_storage = multiplicand_storage << 2;
-            multiplier_storage = multiplier_storage >> 2;
+            multiplier_storage = multiplier_storage >>> 2;
             pattern = multiplier_storage[2:0];
         end
 
