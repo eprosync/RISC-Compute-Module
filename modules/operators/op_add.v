@@ -12,7 +12,7 @@ module op_add_32(input [31:0] Ain, Bin, input wire Cin, output [31:0] Zout, outp
 	op_add_16 OP2(.Ain(Ain[31:16]), .Bin(Bin[31:16]), .Cin(Cout1), .Zout(Zout[31:16]), .Cout(Cout));
 endmodule
 
-module op_add_16(input [15:0] Ain, Bin, input wire Cin, output [31:0] Zout, output wire Cout);
+module op_add_16(input [15:0] Ain, Bin, input wire Cin, output [15:0] Zout, output wire Cout);
 	wire Cout1, Cout2, Cout3;
 
 	op_add_4 OP1(.Ain(Ain[3:0]), .Bin(Bin[3:0]), .Cin(Cin), .Zout(Zout[3:0]), .Cout(Cout1));
@@ -40,7 +40,8 @@ endmodule
 // Someone asked me about this so I showed a more minimal of op_add_4
 // Typically a full-adder is 2 xor's, 2 and's and 1 or
 // op_add_4 is just op_add_1 done 4 times with everything all combined
-module op_add_1(input Ain, Bin, input wire Cin, output Zout, output wire Cout)
+module op_add_1(input Ain, Bin, input wire Cin, output Zout, output wire Cout);
+	wire P, G;
 	assign P = Ain ^ Bin;
 	assign G = Ain & Bin;
 	assign Cout = G | (P & Cin);

@@ -2,6 +2,8 @@
 // This is use for conditions with branching
 // It can also be used for other things like comparators which I plan on adding at some point
 
+`timescale 1ns / 1ps
+
 // This is just a flip-flop...
 module ff_logic(
         input Clk, D,

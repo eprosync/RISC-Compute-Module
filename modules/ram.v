@@ -23,7 +23,7 @@ module RAM_32(
     end
 
     reg [31:0] data = 32'b0;
-    always @(posedge Clock) begin
+    always @(negedge Clock) begin
         if (Address < 512) begin // 512 can only be mapped to a 9-bit address (so this is for now)
             if (Write && Read) begin
                 $display("[RAM] Warning: Simultaneous read/write at %h!", Address);

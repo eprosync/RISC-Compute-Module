@@ -12,7 +12,7 @@
 // MIT License as per: https://github.com/dawsonjon/fpu/issues/4
 // Modified for Educational Purposes & Compute FPU Engine
 
-module fp_add (
+module fp_add_32 (
         input       Clock, Reset,
         input       A_edge, B_edge, // If you want to overwrite A, B, you need the high, since this is state machine...
         input       A_ack, B_ack, // Acknowledgements that we have received your registers, you may now proceed!

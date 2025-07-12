@@ -5,41 +5,41 @@ module datapath(
         input Clock, Reset, Stop, Clear,
         output Run,
         output wire [31:0] OUTPORT_data_out,
-        input wire [31:0] INPORT_data_in
+        input wire [31:0] INPORT_data_in,
+
+        // Program Counter & Instruction
+        input wire PCin, PCout, IncrementPC, IRin,
+        output wire [31:0] PC_data_out,
+
+        // Enablers
+        output wire [4:0] busmux_selector,
+        input wire Gra, Grb, Grc, Rin, Rout, BAout,
+        input wire HIin, LOin,
+
+        // Outputers
+        input wire HIout, LOout, OUTPORTin, INPORTout, Cout,
+        output wire [31:0] HI_data_out, LO_data_out, INPORT_data_out, C_data_out,
+
+        // ALU
+        input wire Yin, Zin, ZHIout, ZLOout,
+        output wire [31:0] Y_data_out,
+        output wire [63:0] Z_data_out,
+        input wire CON_FF_in,
+        output wire Branch,
+
+        // Memory Management
+        input wire MDRin, MARin, MDRout, Read, Write,
+        input wire [31:0] Mdatain, Mdataout,
+        output wire [31:0] MDR_data_in, MDR_data_out, MAR_data_out,
+
+        // Debug
+        output wire [31:0] R0_data_out, R1_data_out, R2_data_out, R3_data_out, R4_data_out, R5_data_out, R6_data_out, R7_data_out, R8_data_out, R9_data_out, R10_data_out, R11_data_out, R12_data_out, R13_data_out, R14_data_out, R15_data_out,
+        output wire [31:0] ZHI_data_out, ZLO_data_out, IR_data_out, DBus,
+        output wire [15:0] Rout_cs,
+        input wire [15:0] Rin_cs,
+        output wire [7:0] Present_State,
+        output wire R15in
     );
-
-    // Program Counter & Instruction
-    wire PCin, PCout, IncrementPC, IRin;
-    wire [31:0] PC_data_out;
-
-    // Enablers
-    wire Gra, Grb, Grc, Rin, Rout, BAout;
-    wire HIin, LOin;
-
-    // Outputers
-    wire HIout, LOout, OUTPORTin, INPORTout, Cout;
-    wire [31:0] HI_data_out, LO_data_out, INPORT_data_out, C_data_out;
-
-    // ALU
-    wire Yin, Zin, ZHIout, ZLOout;
-    wire [31:0] Y_data_out;
-    wire [63:0] Z_data_out;
-    wire CON_FF_in;
-    wire Branch;
-    // output wire [4:0] Control,
-
-    // Memory Management
-    wire MDRin, MARin, MDRout, Read, Write;
-    wire [31:0] Mdatain, Mdataout;
-    wire [31:0] MDR_data_in, MDR_data_out, MAR_data_out;
-
-    // For debugging
-    wire [31:0] R0_data_out, R1_data_out, R2_data_out, R3_data_out, R4_data_out, R5_data_out, R6_data_out, R7_data_out, R8_data_out, R9_data_out, R10_data_out, R11_data_out, R12_data_out, R13_data_out, R14_data_out, R15_data_out;
-    wire [31:0] ZHI_data_out, ZLO_data_out, IR_data_out, DBus;
-    wire [15:0] Rout_cs;
-    wire [15:0] Rin_cs;
-    wire [7:0] Present_State;
-    wire R15in;
 
     // Control Unit
     CU CU(
@@ -56,7 +56,6 @@ module datapath(
         .R15in(R15in),
 
         .Yin(Yin), .Zin(Zin), .ZHIout(ZHIout), .ZLOout(ZLOout),
-        // .Control(Control),
         .CON_FF(CON_FF_in),
         .Branch(Branch),
 
@@ -71,7 +70,7 @@ module datapath(
     // Registers
     register_32 PC(DBus, Clock, Clear, PCin, PC_data_out);
     register_32 IR(DBus, Clock, Clear, IRin, IR_data_out);
-    selector_encoder selector_encoder (Gra, Grb, Grc, Rin, Rout, BAout, IR_data_out, C_data_out, Rin_cs, Rout_cs, R15in);
+    selector_encoder selector_encoder(Gra, Grb, Grc, Rin, Rout, BAout, IR_data_out, C_data_out, Rin_cs, Rout_cs, R15in);
 
     register_R0_32 R0(DBus, Clock, Clear, Rin_cs[0], BAout, R0_data_out);
     register_32 R1(DBus, Clock, Clear, Rin_cs[1], R1_data_out);
@@ -97,7 +96,7 @@ module datapath(
     register_32 OUTPORT(DBus, Clock, Clear, OUTPORTin, OUTPORT_data_out);
 
     // ALU & Logic Section
-    conff_logic CONFF (DBus, IR_data_out[22:19], CON_FF_in, Branch);
+    cff_logic_32 CONFF(DBus, IR_data_out[22:19], CON_FF_in, Branch);
     register_32 ZHI(Z_data_out[63:32], Clock, Clear, Zin, ZHI_data_out);
     register_32 ZLO(Z_data_out[31:0], Clock, Clear, Zin, ZLO_data_out);
     register_32 Y(DBus, Clock, Clear, Yin, Y_data_out);
@@ -115,11 +114,10 @@ module datapath(
     // Memory Section
     register_32 MDR(MDR_data_in, Clock, Clear, MDRin, MDR_data_out);
     register_32 MAR(DBus, Clock, Clear, MARin, MAR_data_out);
-    mdmux mdmux (DBus, Mdataout, Read, MDR_data_in);
-    RAM RAM (Clock, Read, Write, MAR_data_out[15:0], MDR_data_out, Mdataout);
+    mdmux mdmux(DBus, Mdataout, Read, MDR_data_in);
+    RAM_32 RAM(Clock, Read, Write, MAR_data_out[15:0], MDR_data_out, Mdataout);
 
     // DBus Direction Section
-    wire [4:0] busmux_encoder_selector;
     busmux_encoder busmux_encoder(
         .R0(Rout_cs[0]),
         .R1(Rout_cs[1]),
@@ -147,10 +145,10 @@ module datapath(
         .InPort(INPORTout),
         .C(Cout),
 
-        .Control(busmux_encoder_selector)
+        .Control(busmux_selector)
     );
 
-    busmux busmux (
+    busmux busmux(
         .R0(R0_data_out),
         .R1(R1_data_out),
         .R2(R2_data_out),
@@ -177,7 +175,7 @@ module datapath(
         .InPort(INPORT_data_out),
         .C(C_data_out),
 
-        .Control(busmux_encoder_selector),
+        .Control(busmux_selector),
         .BusMuxOut(DBus)
     );
 endmodule

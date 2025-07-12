@@ -88,12 +88,12 @@ module ALU_32(
     op_neg_32 neg_op (.Ain(reg_B),.Zout(neg_out));
 
     // Was using this for debugging just to release reg_C when dealing with Clock dependancy
-    always @ (negedge Clock)
+    /*always @ (posedge Clock)
     begin
         reg_C = 32'b0;
-    end
+    end*/
 
-    always @ (posedge Clock) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
+    always @ (negedge Clock) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
     begin
         // Normally this would go through the ADD operator, but I just got lazy I guess...
         if (IncrementPC) begin
