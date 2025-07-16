@@ -2,42 +2,42 @@ module register_128_tb;
 
 	// Declare inputs and outputs
 	reg [127:0] D;
-	reg Clear, Clock, Write;
+	reg clr, clk, wr;
 	wire [127:0] Q;
 
 	// Instantiate module under test
 	register_128 dut(
 		.D(D),
-		.Clear(Clear),
-		.Clock(Clock),
-		.Write(Write),
+		.clr(clr),
+		.clk(clk),
+		.wr(wr),
 		.Q(Q)
 	);
 
 	// Initialize inputs
 	initial begin
-		Clock = 0;
-		Write = 0;
-		Clear = 0;
+		clk = 0;
+		wr = 0;
+		clr = 0;
 		D = 128'b0;
 			
-		Clock = 1; #10;
-		Clock = 0; #10;
+		clk = 1; #10;
+		clk = 0; #10;
 
 		D = 128'h0006_0000_0003;
-		Write = 1;
+		wr = 1;
 			
-		Clock = 1; #10;
-		Clock = 0; #10;
+		clk = 1; #10;
+		clk = 0; #10;
 
 		D = 128'h0000_0006;
-		Write = 1;
+		wr = 1;
 			
-		Clock = 1; #10;
-		Clock = 0; #10;
+		clk = 1; #10;
+		clk = 0; #10;
 
-		Clear = 1;
+		clr = 1;
 
-		Clock = 1; #10;
+		clk = 1; #10;
 	end
 endmodule

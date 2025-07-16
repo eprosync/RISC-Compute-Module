@@ -5,11 +5,11 @@
 // For seperate cache/memory it would be Harvard arch
 
 module RAM_32(
-        input Clock,
-        input Read, Write,
-        input [15:0] Address,
-        input [31:0] DataIn,
-        output [31:0] DataOut
+        input clk,
+        input rd_en, wr_en,
+        input [15:0] addr,
+        input [31:0] din,
+        output [31:0] dout
     );
 
     // This just means each element is stored under a 32-bit address
@@ -19,26 +19,36 @@ module RAM_32(
     initial begin
         // Use this to write some initial data to the memory blocks here
         // EX:
-        memory[0] = 32'h08800002; // ldi R1, 2 ; R1 = 2
+        memory[0] = 32'h09000002; // ldi R2, $2
+        memory[1] = 32'h09800003; // ldi R3, $3
+        memory[2] = 32'h61180004; // addi R2, R3, $4
+
+        memory[3] = 32'h09000002; // ldi R2, $2
+        memory[4] = 32'h09800003; // ldi R3, $3
+        memory[5] = 32'h69180004; // andi R2, R3, $4
+
+        memory[6] = 32'h09000002; // ldi R2, $2
+        memory[7] = 32'h09800003; // ldi R3, $3
+        memory[8] = 32'h71180004; // ori R2, R3, $4
     end
 
     reg [31:0] data = 32'b0;
-    always @(negedge Clock) begin
-        if (Address < 512) begin // 512 can only be mapped to a 9-bit address (so this is for now)
-            if (Write && Read) begin
-                $display("[RAM] Warning: Simultaneous read/write at %h!", Address);
+    always @(negedge clk) begin
+        if (addr < 512) begin // 512 can only be mapped to a 9-bit address (so this is for now)
+            if (wr_en && rd_en) begin
+                $display("[RAM] Warning: Simultaneous read/write at %h!", addr);
                 // ^ This should never happen... but it can... idk
-            end else if (Write) begin
-                memory[Address] <= DataIn;
-                $display("%0t [RAM] Writing... %h @ %h", $time, DataIn, Address);
-            end else if (Read) begin
-                data <= memory[Address];
-                $display("%0t [RAM] Reading... %h @ %h", $time, memory[Address], Address);
+            end else if (wr_en) begin
+                memory[addr] <= din;
+                $display("%0t [RAM] Writing... %h @ %h", $time, din, addr);
+            end else if (rd_en) begin
+                data <= memory[addr];
+                $display("%0t [RAM] Reading... %h @ %h", $time, memory[addr], addr);
             end
-        end else if (Write || Read) begin
-            $display("[RAM] Error: Address %h out of range!", Address);
+        end else if (wr_en || rd_en) begin
+            $display("[RAM] Error: addr %h out of range!", addr);
             // ^ This should also never happen...
         end
     end
-    assign DataOut = data;
+    assign dout = data;
 endmodule

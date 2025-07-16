@@ -1,15 +1,15 @@
 module mdmux(
-        input [31:0] BusMuxOut,
-        input [31:0] Mdatain,
-        input Read,
-        output reg [31:0] MDRin
+        input [31:0] bmux_out,
+        input [31:0] mem_in,
+        input rd_en,
+        output reg [31:0] MDR_out
     );
 
     always @ (*) begin
-        if (Read) begin
-            MDRin = Mdatain;
+        if (rd_en) begin
+            MDR_out = mem_in;
         end else begin
-            MDRin = BusMuxOut;
+            MDR_out = bmux_out;
         end
     end
 endmodule

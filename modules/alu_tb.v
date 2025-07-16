@@ -2,24 +2,23 @@
 
 module alu_tb;
   // Declare inputs and outputs
-  reg Clock, Clear;
+  reg clk, clr; reg [4:0] ctrl;
   reg [31:0] A_in, B_in;
-  reg [4:0] Control;
   wire [63:0] C_out;
 
   // Instantiate module under test
   ALU_32 dut(
-    .Clock(Clock),
-    .Clear(Clear),
-    .Control(Control),
+    .clk(clk),
+    .clr(clr),
+    .ctrl(ctrl),
     .reg_A(A_in),
     .reg_B(B_in),
     .reg_C(C_out)
   );
 
-  // Clock Generator
-  initial Clock = 0;
-  always #1 Clock = ~Clock;
+  // clk Generator
+  initial clk = 0;
+  always #1 clk = ~clk;
 
   task apply_op;
     input [31:0] A, B;
@@ -27,14 +26,14 @@ module alu_tb;
     begin
       A_in = A;
       B_in = B;
-      Control = ctrl;
+      ctrl = ctrl;
       #2;
     end
   endtask
 
   // Initialize inputs
   initial begin
-    Clear = 0;
+    clr = 0;
 
     // Basic operations
     apply_op(32'h00000004, 32'h00000004, 5'b00011); // add -> 0x8

@@ -2,8 +2,8 @@
 // Responsible for operations with arithmetic
 
 module ALU_32(
-        input Clock, Clear, Branch, IncrementPC, // System Control Lines
-        input [4:0] Control, // Which operator to use? (decoded from ID stage)
+        input clk, clr, branch, inc_PC, // System ctrl Lines
+        input [4:0] ctrl, // Which operator to use? (decoded from ID stage)
         input [31:0] reg_A, reg_B, // Input
         output reg [63:0] reg_C // Output
     );
@@ -87,22 +87,22 @@ module ALU_32(
     op_not_32 not_op (.Ain(reg_B),.Zout(not_out));
     op_neg_32 neg_op (.Ain(reg_B),.Zout(neg_out));
 
-    // Was using this for debugging just to release reg_C when dealing with Clock dependancy
-    /*always @ (posedge Clock)
+    // Was using this for debugging just to release reg_C when dealing with clk dependancy
+    /*always @ (posedge clk)
     begin
         reg_C = 32'b0;
     end*/
 
-    always @ (negedge Clock) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
+    always @ (negedge clk) // ALU can always be running, shouldn't break, as we are just looking at the output from CU
     begin
         // Normally this would go through the ADD operator, but I just got lazy I guess...
-        if (IncrementPC) begin
+        if (inc_PC) begin
             reg_C[31:0] = reg_B + 1;
             reg_C[63:32] = 32'b0;
             $display("%0t [ALU] PC +1", $time);
         end else begin
-            $display("%0t [ALU] OP %b", $time, Control);
-            case(Control)
+            $display("%0t [ALU] OP %b", $time, ctrl);
+            case(ctrl)
                 add_select, addi_select: begin
                     reg_C[31:0] = add_out;
                     reg_C[63:32] = 32'b0;
@@ -171,7 +171,7 @@ module ALU_32(
                 end
 
                 br_select: begin
-                    if (Branch) begin
+                    if (branch) begin
                         reg_C[31:0] = add_out;
                         reg_C[63:32] = 32'b0;
                         $display("%0t [ALU] BR A = %h, B = %h", $time, reg_A, reg_B);

@@ -6,7 +6,7 @@
 
 // This is just a flip-flop...
 module ff_logic(
-        input Clk, D,
+        input clk, D,
         output reg Q, Q_not
     );
 
@@ -15,7 +15,7 @@ module ff_logic(
         Q_not <= 1;
     end
 
-    always @ (Clk)
+    always @ (clk)
     begin
         Q <= D;
         Q_not <= !D;
